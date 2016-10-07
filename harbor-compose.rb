@@ -1,4 +1,6 @@
+require 'digest/sha2'
 require 'fileutils'
+require 'open-uri'
 
 class HarborCompose < Formula
   desc "The harbor-compose command: define and run multi-container Docker apps on Harbor"
@@ -10,12 +12,17 @@ class HarborCompose < Formula
   depends_on 'go' => :build
 
   def install
-    FileUtils.mkdir_p 'src/github.com/turnerlabs'
-    FileUtils.ln_s Dir.pwd, 'src/github.com/turnerlabs/harbor-compose'
-    ENV['GOPATH']=Dir.pwd
-    system *%w(go build)
+    binary        = 'harbor-compose'
+    binary_url    = "https://github.com/turnerlabs/harbor-compose/releases/download/v#{version}/ncd_darwin_amd64"
+    binary_sha256 = 'e28bf7d9fcc22cdfde0c7c8f31e3648a4847e7bda9cb69f309f24257eee3dd41'
+    open(binary, 'wb') do |file|
+      shasum = Digest::SHA256.new.update(open(binary_url).read.tap do |data|
+        file << data
+      end).hexdigest
+      abort("Download failure: shasum(#{binary_url}) != #{binary_256}") unless shasum = binary_sha256
+    end
     FileUtils.mkdir_p "#{prefix}/bin"
-    FileUtils.mv "harbor-compose-#{version}", "#{prefix}/bin/harbor-compose"
+    FileUtils.mv binary, "#{prefix}/bin/#{binary}"
   end
 
   test do
