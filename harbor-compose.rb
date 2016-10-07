@@ -19,7 +19,7 @@ class HarborCompose < Formula
       shasum = Digest::SHA256.new.update(open(binary_url).read.tap do |data|
         file << data
       end).hexdigest
-      abort("Download failure: shasum(#{binary_url}) != #{binary_256}") unless shasum = binary_sha256
+      abort("Download failure: shasum(#{binary_url}) != #{binary_sha256}") unless shasum = binary_sha256
     end
     FileUtils.mkdir_p "#{prefix}/bin"
     FileUtils.mv binary, "#{prefix}/bin/#{binary}"
